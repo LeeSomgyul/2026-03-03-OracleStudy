@@ -8,7 +8,7 @@ public class EmpMain {
 	public static void main(String[] args) throws Exception{
 		
 		Scanner scan = new Scanner(System.in);
-		System.out.print("직위입력: ");
+		System.out.print("직위 입력: ");
 		String job = scan.next();
 		
 		//드라이버 가져오기
