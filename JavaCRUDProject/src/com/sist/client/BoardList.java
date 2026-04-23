@@ -1,23 +1,28 @@
 package com.sist.client;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.List;
+
 import javax.swing.*;
 import javax.swing.table.*;
+import java.awt.event.*;
 
-public class BoardList extends JPanel implements ActionListener{
+import com.sist.dao.*;
+import com.sist.vo.*;
+
+public class BoardList extends JPanel 
+implements ActionListener,MouseListener
+{
     JButton inBtn,prevBtn,nextBtn;
     JLabel pageLa,titleLa;
     JTable table;
     DefaultTableModel model;
     TableColumn column;
-    int totalpage = 0;
-    int curpage = 1;
+    int totalpage=0;
+    int curpage=1;
     UserMainForm mf;
-    
-   public BoardList(UserMainForm mf)
+    public BoardList(UserMainForm mf)
     {
+    	this.mf=mf;
     	inBtn=new JButton("새글");//<input type=button value="새글">
     	prevBtn=new JButton("이전");
     	nextBtn=new JButton("다음");
@@ -76,7 +81,7 @@ public class BoardList extends JPanel implements ActionListener{
     	add(titleLa);
     	inBtn.setBounds(180, 70, 100, 30);
     	add(inBtn);
-    	js.setBounds(180, 110, 600, 330);
+    	js.setBounds(180, 110, 600, 450);
     	add(js);
     	
     	JPanel p=new JPanel();
@@ -84,25 +89,109 @@ public class BoardList extends JPanel implements ActionListener{
     	p.add(pageLa);
     	p.add(nextBtn);
     	
-    	p.setBounds(180, 450, 600, 35);
+    	p.setBounds(180, 570, 600, 35);
     	add(p);
     	
     	prevBtn.addActionListener(this);
     	nextBtn.addActionListener(this);
+    	inBtn.addActionListener(this);
+    	table.addMouseListener(this);
+    	print();
     }
     public void print()
     {
-    	//테이블 지우기
-    	for(int i=model.getRowCount()-1; i>=0; i--) {
+    	// 테이블 지우기 
+    	for(int i=model.getRowCount()-1;i>=0;i--)
+    	{
     		model.removeRow(i);
     	}
     	
+    	// 오라클 연동 
+    	BoardDAO dao=BoardDAO.newInstance();
+    	List<BoardVO> list=dao.board_list(curpage);
+    	totalpage=dao.boardTotalPage();
     	
+    	// 목록 출력 
+    	for(BoardVO vo:list)
+    	{
+    		String[] data={
+    			String.valueOf(vo.getNo()),
+    			vo.getSubject(),
+    			vo.getName(),
+    			vo.getDbday(),
+    			String.valueOf(vo.getHit())
+    		};
+    		model.addRow(data);
+    	}
+    	// 페이지 지정 
+    	pageLa.setText(curpage + " page / "
+    	              +totalpage+" pages");
     }
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		if(e.getSource()==inBtn)
+		{
+			mf.cp.bInsert.nameTf.setText("");
+			mf.cp.bInsert.subTf.setText("");
+			mf.cp.bInsert.ta.setText("");
+			mf.cp.bInsert.pwdPf.setText("");
+			
+			mf.cp.card.show(mf.cp, "BINSERT");
+			mf.cp.bInsert.nameTf.requestFocus();
+		}
+		else if(e.getSource()==prevBtn)
+		{
+			if(curpage>1)
+			{
+				curpage--;
+				print();
+			}
+		}
+		else if(e.getSource()==nextBtn)
+		{
+			if(curpage<totalpage)
+			{
+				curpage++;
+				print();
+			}
+		}
+	}
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		if(e.getSource()==table)
+		{
+			if(e.getClickCount()==2)// 더블 클릭
+			{
+				// ROW 
+				int row=table.getSelectedRow();
+				String no=model.getValueAt(row, 0).toString();
+//				JOptionPane.showMessageDialog(this,
+//						"선택된 게시물 번호:"+no);
+				mf.cp.card.show(mf.cp, "BDETAIL");
+				mf.cp.bDetail.print(Integer.parseInt(no));
+			}
+		}
+	}
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
 		
+	}
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
 		
+	}
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
 		
 	}
 }
