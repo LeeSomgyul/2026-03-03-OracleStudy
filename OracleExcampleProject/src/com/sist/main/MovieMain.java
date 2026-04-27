@@ -1,24 +1,23 @@
 package com.sist.main;
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.table.*;
-
-import com.sist.dao.MovieDAO;
-import com.sist.vo.MovieVO;
-import java.util.*;
 import java.util.List;
 
-public class MovieMain extends JFrame{
+import javax.swing.*;
+import javax.swing.table.*;
+import com.sist.vo.*;
+import com.sist.dao.*;
+public class MovieMain extends JFrame 
+implements ActionListener,MouseListener
+{
 	JButton prevBtn,nextBtn;
     JLabel pageLa,titleLa;
     JTable table;
     DefaultTableModel model;
     TableColumn column;
-    MovieDAO dao = new MovieDAO();
-    int curpage = 1;
-    int totalpage = 0;
-    
+    MovieDAO dao=new MovieDAO();
+    int curpage=1;
+    int totalpage=0;
     public MovieMain()
     {
     	
@@ -53,15 +52,15 @@ public class MovieMain extends JFrame{
     		}
     		else if(i==1)
     		{
-    			column.setPreferredWidth(350);
+    			column.setPreferredWidth(150);
     		}
     		else if(i==2)
     		{
-    			column.setPreferredWidth(100);
+    			column.setPreferredWidth(250);
     		}
     		else if(i==3)
     		{
-    			column.setPreferredWidth(150);
+    			column.setPreferredWidth(200);
     		}
     		else if(i==4)
     		{
@@ -93,34 +92,106 @@ public class MovieMain extends JFrame{
     	setVisible(true);
     	setDefaultCloseOperation(EXIT_ON_CLOSE);
     	print();
+    	
+    	prevBtn.addActionListener(this);
+    	nextBtn.addActionListener(this);
+    	table.addMouseListener(this);
     }
-    
-    public void print() {
-    	for(int i=model.getRowCount()-1; i>=0; i--) {
+    public void print()
+    {
+    	// 테이블을 전체를 지운다 
+    	for(int i=model.getRowCount()-1;i>=0;i--)
+    	{
     		model.removeRow(i);
     	}
     	
+    	// 데이터 읽기 
+    	List<MovieVO> list=dao.movieListData(curpage);
+    	totalpage=dao.movieTotalPage();
     	
-    	List<MovieVO> list = dao.movieListData(curpage);
-    	totalpage = dao.movieTotalPage();
-    	
-    	for(MovieVO vo:list) {
-    		String[] data = {
+    	for(MovieVO vo:list)
+    	{
+    		String[] data={
     			String.valueOf(vo.getMno()),
     			vo.getTitle(),
     			vo.getActor(),
     			vo.getRegdate(),
     			vo.getGenre()
+    			
     		};
     		model.addRow(data);
     	}
     	
-    	pageLa.setText(curpage + " page / " + totalpage + " page /");
+    	pageLa.setText(curpage+" page / "+totalpage+" pages");
     }
-    
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
         new MovieMain();
+	}
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		// 버튼 클릭시 처리 
+		if(e.getSource()==prevBtn)
+		{
+			if(curpage>1)
+			{
+				curpage--;
+				print();
+			}
+		}
+		else if(e.getSource()==nextBtn)
+		{
+			if(curpage<totalpage)
+			{
+				curpage++;
+				print();
+			}
+		}
+	}
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		if(e.getSource()==table)
+		{
+			if(e.getClickCount()==2)// 더블 클릭
+			{
+				// 1. 선택된 ROW 위치 
+				int row=table.getSelectedRow();
+				String mno=model.getValueAt(row, 0).toString();
+				MovieVO vo=dao.movieDetailData(
+						     Integer.parseInt(mno));
+				String msg="영화번호:"+vo.getMno()+"\n"
+						 +"영화명:"+vo.getTitle()+"\n"
+						 +"출연:"+vo.getActor()+"\n"
+						 +"감독:"+vo.getDirector()+"\n"
+						 +"장르:"+vo.getGenre()+"\n"
+						 +"등급:"+vo.getGrade()+"\n"
+						 +"개봉일:"+vo.getRegdate();
+				JOptionPane.showMessageDialog(this, 
+						 msg);
+			}
+		}
+	}
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

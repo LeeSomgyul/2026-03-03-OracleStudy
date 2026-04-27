@@ -8,33 +8,27 @@ import javax.swing.table.*;
 
 import com.sist.dao.*;
 import com.sist.vo.*;
-public class MovieFind extends JFrame
+
+public class MusicMain extends JFrame
 implements ActionListener
 {
     JLabel titleLa;
     JTable table;
     DefaultTableModel model;
     TableColumn column;
-    JComboBox box;
-    JTextField tf;
-    JButton b;
-    MovieDAO dao=new MovieDAO();
-    public MovieFind()
+   
+    JButton[] btns=new JButton[7];
+    MusicDAO dao=new MusicDAO();
+    // DAO => 한개 테이블만 담당 
+    String[] bTitle={"Top 200","가요","POP","OST","트롯","JAZZ","CLASSIC"};
+    public MusicMain()
     {
     	
     	
-    	titleLa=new JLabel("영화 목록",JLabel.CENTER);// <table>
+    	titleLa=new JLabel("뮤직 목록",JLabel.CENTER);// <table>
     	titleLa.setFont(new Font("맑은 고딕",Font.BOLD,30)); //<h3></h3>
     	
-    	box=new JComboBox();
-    	box.addItem("제목");
-    	box.addItem("장르");
-    	box.addItem("출연");
-    	
-    	tf=new JTextField(20);
-    	b=new JButton("검색");
-    	
-    	String[] col={"번호","영화명","출연","개봉일","장르"};//<tr><th></th>....</tr>
+    	String[] col={"번호","" , "곡명","가수명","앨범"};//<tr><th></th>....</tr>
     	String[][] row=new String[0][5];
     	// 한줄에 5개 데이터를 첨부 
     	model=new DefaultTableModel(row,col) // 데이터 관리
@@ -59,19 +53,19 @@ implements ActionListener
     		}
     		else if(i==1)
     		{
-    			column.setPreferredWidth(350);
+    			column.setPreferredWidth(50);
     		}
     		else if(i==2)
     		{
-    			column.setPreferredWidth(100);
+    			column.setPreferredWidth(200);
     		}
     		else if(i==3)
     		{
-    			column.setPreferredWidth(150);
+    			column.setPreferredWidth(200);
     		}
     		else if(i==4)
     		{
-    			column.setPreferredWidth(50);
+    			column.setPreferredWidth(200);
     		}
     	}
     	table.getTableHeader().setReorderingAllowed(false);
@@ -88,36 +82,64 @@ implements ActionListener
     	add(js);
     	
     	JPanel p=new JPanel();
-    	p.add(box);
-    	p.add(tf);
-    	p.add(b);
+    	for(int i=0;i<btns.length;i++)
+    	{
+    		btns[i]=new JButton(bTitle[i]);
+    		p.add(btns[i]);
+    		
+    		btns[i].addActionListener(this);
+    	}
     	
-    	p.setBounds(10, 70, 350, 35);
+    	p.setBounds(10, 70, 800, 35);
     	add(p);
     	
     	setSize(850, 700);
     	setVisible(true);
     	setDefaultCloseOperation(EXIT_ON_CLOSE);
+    	print(1);
     	
-    	tf.addActionListener(this);
-    	b.addActionListener(this);
     }
-    public void print(String col,String fd)
+    public void print(int cno)
     {
     	for(int i=model.getRowCount()-1;i>=0;i--)
     	{
     		model.removeRow(i);
     	}
     	// 데이터 읽기 
-    	List<MovieVO> list=dao.movieFindData(col, fd);
-    	for(MovieVO vo:list)
+    	List<MusicVO> list=dao.musicListData(cno);
+    	String id="";
+    	for(MusicVO vo:list)
     	{
+    		if(vo.getState().equals("하강"))
+    		{
+    			id="<html>"
+    			  +"<body>"
+    			  +"<font color=blue>▼ "+vo.getIdcrement()+"</font>"
+    			  +"</body>"
+    			  +"<html>";
+    		}
+    		else if(vo.getState().equals("상승"))
+    		{
+    			id="<html>"
+    	    	   +"<body>"
+    	    	   +"<font color=red>▲ "+vo.getIdcrement()+"</font>"
+    	    	   +"</body>"
+    	    	   +"<html>";
+    		}
+    		else
+    		{
+    			id="<html>"
+    	    	  +"<body>"
+    	    	  +"<font color=gray>-</font>"
+    	    	  +"</body>"
+    	    	  +"<html>";
+    		}
     		String[] data={
-    			String.valueOf(vo.getMno()),
+    			String.valueOf(vo.getNo()),
+    			id,
     			vo.getTitle(),
-    			vo.getActor(),
-    			vo.getRegdate(),
-    			vo.getGenre()
+    			vo.getSinger(),
+    			vo.getAlbum()
     		};
     		
     		model.addRow(data);
@@ -125,27 +147,17 @@ implements ActionListener
     }
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-        new MovieFind();
+        new MusicMain();
 	}
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
-		if(e.getSource()==b || e.getSource()==tf)
+		for(int i=0;i<btns.length;i++)
 		{
-			String fd=tf.getText();
-			// 입력값 읽기 
-			if(fd.trim().length()<1)
+			if(e.getSource()==btns[i])
 			{
-				// 입력이 안됨 
-				tf.requestFocus();
-				return;
+				print(i+1);
 			}
-			
-			String[] column={"title","genre","actor"};
-			int index=box.getSelectedIndex();
-			System.out.println(fd);
-			System.out.println(column[index]);
-			print(column[index],fd);
 		}
 	}
 
