@@ -7,17 +7,18 @@ import javax.swing.JPanel;
 
 // 화면 변경 
 public class ControlPanel extends JPanel{
-	UserMainFrame uf;
+	
 	// 1. HOME 
 	HomePanel hp;
+	GoodsDetailForm gdf;
 	CardLayout card=new CardLayout();
-    public ControlPanel(UserMainFrame uf)
+    public ControlPanel()
     {
-    	this.uf=uf;
     	setBackground(Color.cyan);
     	setLayout(card);
-    	hp=new HomePanel(uf);
-    	
+    	hp=new HomePanel(this);
+    	gdf=new GoodsDetailForm(this);
     	add("HOME",hp);
+    	add("DETAIL",gdf);
     }
 }
