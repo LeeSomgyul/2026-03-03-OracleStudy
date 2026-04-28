@@ -34,7 +34,10 @@ public class GoodsDAO {
 	  {
 		  conn=DriverManager.getConnection(URL,"hr",
 				         "happy");
-	  }catch(Exception ex) {}
+	  }catch(Exception ex) {
+		  System.out.println("연결 실패 에러 메시지: " + ex.getMessage());
+	        ex.printStackTrace();
+	  }
   }
   // 3. 오라클 연결 해제 
   public void disConnection()
